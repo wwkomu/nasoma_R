@@ -1,0 +1,297 @@
+---
+title: Dealing with Notorious Data Sets
+subtitle:       An ntroduction to thinking like a data analyst
+author: William Komu
+date: '`r Sys.Date()`'
+document: pdf_doc
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE
+)
+# This setup covers the whole document!
+# Forbids the code from displaying!
+
+```
+
+***I have noticed that the code chuck above setup the entire document such that we don't have to keep repeating the `echo=FALSE` line at every insertion of a code chuck***
+
+***Oooooo...f course you won't see it! So, lemme give you a test:***
+
+## The Knitr Setup code
+
+    {r setup, include=FALSE}
+    knitr::opts_chunk$set(
+        echo = FALSE,
+        message = FALSE,
+        warning = FALSE
+    )
+    # This setup covers the whole document
+    # We cannot display code
+
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+
+
+**This is an emoji bomb!!!!! The inclusion of this bomb is just a showoff that carries no meaningful meaning. It seems this is meanigless avenue!!!**
+
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+
+Of course, I can do other emojis!
+
+`r emo::ji("monkey")`
+`r emo::ji("monkey")`
+`r emo::ji("monkey")`
+`r emo::ji("poop")`
+`r emo::ji("poop")`
+`r emo::ji("poop")`
+`r emo::ji("poop")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+
+Apparently, repeating the face consequentively generates various faces
+
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+
+## The Case Study
+
+This exercise offers us an opppotunity to apply a series of techniques that we have acquired over the course of our code club sessions!
+
+**The Knitr Setup Chuck** above contains `echo = FALSE`, which hides the code that generates a given outcome in the knitted document! If you want the code to appear, you could set it per chuck by substituting the `echo = FALSE` wth `echo = TRUE`!
+
+
+Oooh! My bad!! You can't see it coz it has echoed itself off!
+
+# Pseudocode
+
+Let us create an outline of what this exercise entails:
+1. Read the csv and excel filters
+2. Subset the only graduates from MIU
+3. Subset the portion of the excel that indicates the code for degrees aarded!
+4. filter
+5. rename
+6. clean
+7. JOIN
+   1. Perharps the most crucial part of the exercise!
+   2. simple if you know what you want and how to get it!
+
+
+### Load or install packages
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(emo)
+library(janitor)
+library(knitr)
+library(rmarkdown)
+
+# install.packages("janitor")
+# remotes::install_github("hadley/emo")
+
+```
+
+
+Let's test emojis in `.rmd`:
+
+```{r, echo=FALSE}
+emo::ji("star")
+
+emo::ji("poop")
+```
+
+Given the setup code above has `echo=FALSE` for the whole document, we can only report the code chuck if we override the setup instructions as follows:
+
+```{r, echo=TRUE}
+emo::ji("star")
+
+emo::ji("poop")
+```
+
+## Import the Data
+### The Entire Dataset
+
+```{r imports entire degree issued dataset}
+
+degrees <- read_csv("/home/iamlnx/Documents/nasomaR/data/c2018_a.csv")
+
+```
+
+### The Data Dictionary
+
+Let's now load the other data set, whihc is a dictionary of explaining the data sets. This one is in .xlsx form. Thus, we are going to use `read_excel` function. This function lives in the `readxl` universe! Or does it? This is a topic that we will examine in a few, eos or seconds!
+
+The chuck below calls the data set and filter only the part of the data that we need - that is, the one that explains the above codes for degree!
+
+```{r}
+data_dict <- read_excel("/home/iamlnx/Documents/nasomaR/data/c2018_a.xlsx", sheet = "Frequencies")
+
+```
+
+### Printing the Two Tables - `degrees` and `degree_name`
+```{r}
+knitr::kable(degrees[1:10, 1:10], caption = "A subset of degrees in the data set")
+```
+
+```{r}
+knitr::kable(data_dict[1:8, 1:6], caption = "A subset of degrees in the data set")
+```
+
+The data is shitty, huh?
+
+### Filter only MIU CIPCODE=170976
+
+The code below filters the Michichan University (MIU), then arrange (which is redundant because it offers no addtional value and it is just there to help us ensure there is a value `99`), then filters out the CIPCODE 99 since it is just a grand sum of some shiet I don't know, then filters only the first class degrees that the MIU issued in 2018!
+
+Then return the count of by degree_type
+
+```{r}
+first_c <- degrees %>%
+    filter(UNITID == 170976) %>%
+    arrange(desc(CIPCODE)) %>%
+    filter(CIPCODE != 99 & MAJORNUM == 1) %>%
+    count(AWLEVEL) %>%
+    rename("degree_code" = AWLEVEL)
+```
+
+If I print the table, we can see it is a shitty one
+
+### Filter
+```{r}
+degrees_names <- data_dict  %>%
+select(codevalue, valuelabel) %>%
+    rename(
+        "degree_code" = codevalue,
+        "degree_name" = valuelabel
+    ) %>%
+    filter(degree_code %in% c("5", "6", "7", "8", "17", "18"))
+```
+
+The chuck below filters the data by the MIU's `CIPCODE`, reporting first class honors awards. Then filters out cipcode +, which is a grand total!
+
+### Bad Robot
+
+Unfortunately, the data degree are coded. One has to correspond the codes with the other set of data to `` to reposrt the degree names!
+
+```{r}
+knitr::kable(first_c, caption = "The count of first class honors that MIU issued by degree_code"
+)
+```
+
+```{r}
+knitr::kable(degrees_names, caption = "The the degrees_code and respective degrees_names that MIU issued"
+)
+```
+
+## JOINING THE DATA FRAMES
+
+### Menial Work
+
+As you can note we have two dfs now. This is not helpful, is it? Definately, not! Thus, we need a way to combine the two to make this stuff meaningful even for those that have no idea what the dfs entail.
+
+This is a rather mundane process, but it is not as simple for a layman as it is for an R master, that I claim, as my new **moniker**.
+
+I mean, you could just get the degrees awarded and correspond them with the values, manually! That is, recode the values one by one! But that is a lot of work. Let's use the power of R to do it!
+
+But aint that tedious??? It really is!!
+
+### Demonstrate the Power of R to Deal with Untidyness
+
+```{r, echo=FALSE}
+
+final_miu_first <- data.frame(degrees_names, c(first_c)) %>%
+    rename("number_of_graduates"=n)
+
+```
+
+### Print Final Tables
+
+
+```{r}
+final_miu_first
+```
+
+This table has joined the set and we can tidy it by selecting only the names and the count:
+
+```{r}
+final_miu_first %>%
+    select(degree_name, number_of_graduates)
+
+```
+
+
+
+
+# THE GUINEA PIG
+## A Series of Face emojis
+
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+`r emo::ji("face")`
+
+
+/home/iamlnx/Documents/GitHub/nasoma_R/code/generalR_s11.Rmd
+
+
+<!-- Git Commands
+git add .gitignore code/test.Rmd code/generalR_s11.Rmd
+
+git commit -m "Initial commit of a .gitignire and the generalR files"
+ -->
