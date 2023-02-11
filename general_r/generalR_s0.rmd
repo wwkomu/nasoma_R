@@ -1,0 +1,16 @@
+---
+title: 'Test Document'
+author: 'William Komu'
+date: '`r Sys.Date()`'
+dosument: pdf_doc
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning=FALSE
+)
+```
+
+How to add emojis in a markdown file!
