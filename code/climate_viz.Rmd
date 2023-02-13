@@ -164,7 +164,7 @@ t_data %>% ggplot(aes(year, t_diff, fill = t_diff)) +
                 colors = c("darkblue", "white", "darkred"),
                 values = rescale(c(min(t_data$t_diff), 0, max(t_data$t_diff))),
                 limits = c(min(t_data$t_diff), max(t_data$t_diff)),
-                n.breaks = 7
+                n.breaks = 9
         ) +
         theme_void() +
         theme(
