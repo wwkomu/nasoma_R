@@ -1,0 +1,101 @@
+---
+title: 'Working with Dates'
+subtitle: "A wow demonstration by Professor PScholls on how to play around with data with local weather data(precipitation)"
+author: 'William Komu'
+date: '`r Sys.Date()`'
+document: pdf_doc
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+## Load pkgs and data
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(glue)
+library(scales)
+library("ggtext")
+
+```
+
+We need to rreate a psedo date column to enable us to plot months on x-axis and cumulative_prcp on y-axis.
+
+***I have seen you sir come up with with the best tricks, and each day I get amazed! I actually told one of my friends that you must have been involved with the creation of some of the this packages because don't know how amazing one can get ny just learning!***
+
+Yesterday was you slicing the years and to pass as mean
+
+Sadly, i cannot pass this information because it is pass the date!!!
+
+```{r master_tricks}
+this_year <- year(today()) - 1
+this_month <- month(today())
+this_day <- day(today())
+```
+
+
+Add `geom_smooth` as a proxy for mean
+Rather than going to calculate the mean for each of the values!
+
+Align title left
+
+`plot.title.position="plot"`
+
+Wrap and allow use of markdown
+
+From the `gg_text()`, the `element_textbox_simple`, which allows us to auto-wrap the title within the plot window and enables the use of `markdown`, which then allows us to play around with text formatting like color, bold, or html formatting, etc!
+
+Just imagine bringing the fabulous features of markdown to your `ggplot()`
+
+```{r}
+read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/climate/data/3232981full .csv") %>%
+    clean_names() %>%
+    select(date, prcp) %>%
+    drop_na(prcp) %>%
+    mutate(
+        year = year(date),
+        month = month(date),
+        day = day(date),
+        is_this_year = year == this_year
+    ) %>%
+    filter(year != 1891 q& (month != 2 & day != 29)) %>%
+    arrange(desc(year)) %>%
+    mutate(new_date = ymd(glue("2022-{month}-{day}"))) %>%
+    group_by(year) %>%
+    mutate(cum_prcp = cumsum(prcp)) %>%
+    arrange(year) %>%
+    ungroup() %>%
+    ggplot(aes(x = new_date, y = cum_prcp, group = year, color = is_this_year, size = is_this_year)) +
+    geom_line(show.legend = FALSE) +
+    geom_smooth(aes(group = 1), color = "black", size = 0.3) +
+    scale_color_manual(
+        breaks = c(FALSE, TRUE),
+        values = c("lightgrey", "dodgerblue")
+    ) +
+    scale_size_manual(
+        breaks = c(FALSE, TRUE),
+        values = c(0.3, 1.25)
+    ) +
+    scale_x_date(date_labels = "%B", date_breaks = "2 months") +
+    scale_y_continuous(expand = c(0, 0), breaks = seq(0, 1200, 300), labels = seq(0, 120, 30)) +
+    labs(
+        x = NULL, y = "Cumulative precipitation (cm)",
+        title = glue("Through July 22nd, the cumulative precipitation near Ann Arbor, MI is <span style = 'color: dodgerblue'> above average </span> for {this_year}") # nolint: line_length_linter.
+    ) +
+    theme(
+        plot.title.position = "plot",
+        plot.title = element_textbox_simple(margin = margin(b = 10)),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.line = element_line()
+    )
+
+ggsave("charts/cumulative_prcp.png", width = 6, height = 5)
+```
