@@ -52,7 +52,7 @@ this_year <- year(today()) - 1
 min_year <- t_diff %>%
     summarise(year = min(year))
 
-plot_tt <- glue("Global temparature change since {min_year} by month")
+plot_tt <- glue("Global temparature change (1880-2022)")
 ```
 
 ### Create subsets of last Dec and next Jan
@@ -95,23 +95,23 @@ to replicate that effect!
 
 # # next_Jan
 
-# next_jan <- t_diff %>%
-#     filter(month == "Jan") %>%
-#     mutate(year = year - 1, month = "next_Jan")
+next_jan <- t_diff %>%
+    filter(month == "Jan") %>%
+    mutate(year = year - 1, month = "next_Jan")
 
 # Join/bind the three dfs
 ## Then pipe the joint_df into ggplot
 
-t_data <- t_diff  %>% #bind_rows(last_dec, t_diff, next_jan) %>%
+t_data <- bind_rows(t_diff, next_jan) %>%
     mutate(
-        month = factor(month, levels = c("last_Dec", month.abb, "next_Jan")),
-        month_number = as.numeric(month) - 1,
+        month = factor(month, levels = c(month.abb, "next_Jan")),
+        month_number = as.numeric(month),
         is_this_year = year == this_year
     )
 
-# annotation <- joint_t_diff %>%
-#     slice_max(is_this_year) %>%
-#     slice_max(month_number)
+annotation <- t_data %>%
+    slice_max(year) %>% # Return to year because we got rid of the last_Dec
+    slice_max(month_number)
 
 # joint_t_diff %>%
 #     filter(year == 2023)
@@ -123,70 +123,101 @@ Let's plug the data to ggplot and display a skeleton of our draft plot, so that 
 
 Note: the `group` allows for plotting lines in `geom_line()`
 
-```{r draft_plot}
-
-t_diff %>%
-    ggplot(aes(month, t_diff, group = year, color = year)) +
-    geom_line()
-
-# Save to help us view the effect of the alteration we do!
-
-# ggsave("charts/skeleton_climate_spiral.png", width = 6, height = 2)
-```
-
 ### Final plot
 
-```{r global_t_anomalies_plt}
-  t_data %>%
-    ggplot(aes(month_number, t_diff, group = year, color = year, size = is_this_year)) +
-    geom_hline(yintercept = 0, color = "white") +
+#### Dummy tible
+1. This tibble creates coordinates to pass into `geom_label` (_text too???) as labels to the outer red rings!!
+2. The second is a df for months name and position
+
+**NOTE:** Since ggplot2 takes any addition of `geom_()` as a layer, the sequence in which we put the `geom_()` argms determine the lower and uppeer, where the first arg is lower and the subseqs uppers. The dfs we create below will go on top of the `geom_line()`
+
+```{r}
+temp_lines <- tibble(
+    x = 12,
+    y = c(1.5, 2.0),
+    labels = c("1.5\u00B0C", "2.0\u00B0C")
+)
+
+month_labels <- tibble(
+    x = 1:12,
+    labels = month.abb,
+    y = 2.7
+)
+```
+
+```{r global_t_spiral_plt}
+t_data %>%
+    ggplot(aes(month_number, t_diff, group = year, color = year)) +
+    geom_col(data = month_labels, aes(x = x + .5, y = 2.4), fill = "black", width = 1, inherit.aes = FALSE) +
+    geom_col(data = month_labels, aes(x = x + .5, y = -2), fill = "black", width = 1, inherit.aes = FALSE) +
+    geom_hline(yintercept = c(1.5, 2.0), color = "red") +
     geom_line() +
-    #geom_text(data = annotation, aes(month_number, t_diff, label = year, color = year), inherit.aes = FALSE,
-    # hjust = 0, size = 5,
-    # nudge_x = -1,
-    # nudge_y = .1,
-    # fontface = "bold") +
+    geom_point(
+        data = annotation, aes(
+            x = month_number, y = t_diff,
+            color = year
+        ),
+        size = 5,
+        inherit.aes = FALSE
+    ) +
+    geom_label(
+        data = temp_lines, aes(
+            x = x, y = y,
+            label = labels
+        ),
+        color = "red", fill = "black",
+        label.size = 0,
+        inherit.aes = FALSE
+    ) +
+    geom_text(
+        data = month_labels,
+        aes(
+            x = x,
+            y = y,
+            label = labels
+        ),
+        inherit.aes = FALSE,
+        color = "white",
+        angle = seq(360 - 360 / 12, 0, length.out = 12),
+    ) +
+    geom_text(aes(x = 1, y = -1.3, label = "2022")) +
     scale_x_continuous(
         breaks = 1:12,
-        labels = month.abb,
+        labels = month.abb, expand = c(0, 0),
         sec.axis = dup_axis(name = NULL, labels = NULL)
     ) +
     scale_y_continuous(
         breaks = seq(-2, 2, 0.2),
+        limits = c(-2, 2.7), expand = c(0, -0.7),
         sec.axis = dup_axis(name = NULL, labels = NULL)
     ) +
     scale_color_viridis_c(
         breaks = seq(1880, 2022, 20),
-        guide = guide_colorbar(frame.colour = "white", frame.frame.linewidth = 2)
+        guide = "none"
     ) +
     scale_size_manual(
         breaks = c(FALSE, TRUE),
         values = c(0.25, 1),
         guide = "none"
     ) +
-    coord_cartesian(xlim = c(1, 12)) +
-    labs(x = NULL, y = "Temparature changes since pre-industrial time [\u00B0C]") +
+    coord_polar(start = 2 * pi / 12) +
+    # coord_cartesian(xlim = c(1, 12)) +
+    labs(x = NULL, y = NULL) +
     # ggtitle(label = glue("Global temparature change since {min_year} by month")) +
     ggtitle(plot_tt) +
     theme(
-        panel.background = element_rect(fill = "black", color = "white", size = 1),
-        plot.background = element_rect(fill = "#444444"),
+        panel.background = element_rect(fill = "#444444", size = 1),
+        plot.background = element_rect(fill = "#444444", color = "#444444"),
         panel.grid = element_blank(),
-        axis.text = element_text(color = "white", size = 13),
-        axis.ticks = element_line(color = "white"),
-        axis.ticks.length = unit(-5, "pt"),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
         axis.title = element_text(color = "white", size = 13),
         plot.title = element_text(color = "white", hjust = 0.5, size = 15),
-        legend.title = element_blank(),
-        legend.background = element_rect(fill = NA),
-        legend.text = element_text(color = "white"),
-        legend.key.height = unit(55, "pt")
     )
 # Save to help us view the effect of the alteration we do!
 
-ggsave("charts/climate_spiral.png", width = 8, height = 4.5)
-
-# theme_void()
+ggsave("charts/climate_spiral_static.png", width = 10, height = 5)
 ```
 
 
@@ -205,9 +236,29 @@ Print the tail end of a df, where n = # of rows!
 `data  %>% tail(n=#)`
 
 ```{r}
-t_diff %>% tail(n = 10)
+# t_diff %>% tail(n = 10)
 ```
 
 ```{r}
-# ?theme(plot.title.position)q
+# ?theme(plot.title.position)
+```
+
+
+^[THIS IS A FOOTNOTE]
+
+The format_document features does not always work when you have made a syntax error! Thus, it is a nice little **"bug buster"**, huh?
+Change the angle of the text labels
+
+`seq(0, 360 - 360 / 12, length.out = 12)`
+
+# Get a circle
+
+How about adding a circle behind our spiral to get the circular shape of the Hopkin's plot!
+
+
+
+```{r}
+# ggplot(data = month_labels, aes(x = x, y = 2.2), fill = "black") +
+#     geom_col() +
+#     coord_polar()
 ```
