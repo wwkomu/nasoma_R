@@ -1,0 +1,260 @@
+---
+title: "Mimic G-Trends Visuals for EPL Big-6 Searches in Kenya"
+author: Willima Komu
+date: "2022-02-14"
+output: pdf_document
+extra_dependencies:
+      hyperref: ["unicode=true", "breaklinks=true"]
+      lmodern: null
+---
+
+### Load packages
+```{r, message=FALSE}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(readr)
+library(emo)
+library(tinytex)
+library(readr)
+library(ggthemes)
+# library(here)
+
+```
+
+```{r}
+cb_palette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+cbb_palette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+
+```
+
+### Load/import the dataset
+```{r}
+gunners_v_manutd <- read_csv("data/arsenal_v_man_u.csv", skip = 2, col_types = "Ddd") %>%
+    clean_names() %>%
+    rename(
+        arsenal = arsenal_f_c_kenya,
+        manutd = manchester_united_f_c_kenya,
+        date = week
+    )
+head(gunners_v_manutd)
+```
+### Separate
+We will need to seprate the Arsenal and Manchester's mentions into their respective data frames
+#### Arsenal
+```{r}
+gunners <- gunners_v_manutd %>%
+    select(date, arsenal) %>%
+    mutate(club = "Arsenal") %>%
+    rename(total_mention = arsenal)
+head(gunners)
+```
+#### Man United
+```{r}
+manutd <- gunners_v_manutd %>%
+    select(date, manutd) %>%
+    mutate(club = "Man Utd") %>%
+    rename(total_mention = manutd)
+head(manutd)
+```
+
+### Append the **Arsenal** and **Man United** dfs
+```{r}
+gunners_v_manutd_df <- rbind(gunners, manutd)
+head(gunners_v_manutd_df)
+```
+
+### Graph different data
+
+We can plot the appended df
+
+#### Line plot
+
+The following code is the resulting line plot.
+
+
+```{r}
+guns_manutd_line_plot <- ggplot(data = gunners_v_manutd_df, aes(color = club, group = club)) +
+    geom_line(aes(date, total_mention), size = 1) +
+    scale_x_date(date_breaks = "1 year") +
+    # geom_smooth(aes(date, total_mention, span = 0.01)) +
+    theme_economist_white() +
+    scale_color_manual(
+        name = NULL,
+        breaks = c("Arsenal", "Man Utd"),
+        values = c("red", "purple")) +
+    scale_x_date(date_labels = "%b %Y", date_breaks = "10 months")
+
+
+guns_manutd_line_plot
+
+ggsave("charts/google_trends/ref_date_manutd_arsenal_v_manutd_pop_kenya.png", plot = guns_manutd_line_plot, width = 7, height = 5)
+```
+
+`cbb_palette`
+```{r}
+guns_manutd_line_plot <- ggplot(data = gunners_v_manutd_df, aes(color = club, group = club)) +
+    geom_line(aes(date, total_mention), size = 1) +
+    scale_x_date(date_breaks = "1 year") +
+    # geom_smooth(aes(date, total_mention, span = 0.01)) +
+    theme_economist_white() +
+    scale_color_manual(
+        name = NULL,
+        breaks = c("Arsenal", "Man Utd"),
+        values = c(cb_palette)
+    ) +
+    scale_x_date(date_labels = "%b %Y", date_breaks = "10 months")
+
+
+guns_manutd_line_plot
+
+ggsave("charts/google_trends/cb_manutd_arsenal_v_manutd_ke.png", plot = guns_manutd_line_plot, width = 7, height = 5)
+
+```
+
+`cb_palette`
+```{r}
+guns_manutd_line_plot <- ggplot(data = gunners_v_manutd_df, aes(color = club, group = club)) +
+    geom_line(aes(date, total_mention), size = 1) +
+    scale_x_date(date_breaks = "1 year") +
+    # geom_smooth(aes(date, total_mention, span = 0.01)) +
+    theme_fivethirtyeight() +
+    scale_color_manual(
+        name = NULL,
+        breaks = c("Arsenal", "Man Utd"),
+        values = c(cbb_palette)) +
+    scale_x_date(date_labels = "%b %Y", date_breaks = "8 months")
+
+
+guns_manutd_line_plot
+
+ggsave("charts/google_trends/cbb_manutd_arsenal_v_manutd_ke.png", plot = guns_manutd_line_plot, width = 7, height = 5)
+
+```
+
+
+
+
+
+
+
+
+### FIXING THE DATE
+
+The read_csv enhances loading data, as one can denote the col_types. This workaround is key if you have to work with data at any point!
+
+
+
+
+
+
+
+
+
+## How About Cumulative
+
+
+```{r}
+cum_manutd <- manutd %>%
+    mutate(year = year(date), month = month(date)) %>%
+    group_by(year) %>%
+    mutate(cum_mention = cumsum(total_mention)) %>%
+    ungroup()
+
+#arsenal
+
+cum_arsenal <- gunners %>%
+    mutate(year = year(date), month = month(date)) %>%
+    group_by(year) %>%
+    mutate(cum_mention = cumsum(total_mention)) %>%
+    ungroup()
+
+arsenal_manutd_cum_df <- rbind(cum_arsenal, cum_manutd)
+
+arsenal_manutd_cum_df %>%
+    ggplot(aes(year, cum_mention, group = year, color =club)) +
+    geom_point()
+
+```
+
+
+
+
+
+
+
+
+
+
+#### Side note on saving the plots
+
+We need to save it to the charts folder so that it can display write here on vsc, which makes it easier to edit various elements and get a real-time output! This allows us to test various changes in a more efficient manner. Normally, the plot is opened in  a new window which is tedious to go view. Although you can set vsc to display viz side-by-side to the wspace, I have found the required settings quite ellusive to retrace! Thus, this is a trick I stumbled upon the other day!
+However, you may not need it if you have enabled preview, but the preview feature is a nuisance that you may not need especially when running code!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MY BATTLE WITH EMOJIS AND RMARKDOWN
+#### Test github_document output renders emojis
+<!--
+```{r}
+emo::ji("star")
+```
+
+:smile_cat: -->
+
+This does not fix the issue with rendering emojis on PDF!
+
+# ```{r}
+# wink_emoji <- "\U0001f609"
+# utf8::utf8_print(wink_emoji)
+# #> [1] "😉​"
+# utf8ToInt(wink_emoji)
+# #> [1] 128521
+# ```
+
+***SO FAR THE SOLUTION IS TO KNIT IT AS HTML THEN PRINT***
+
+This solution kills hyperlinks or so I found out!

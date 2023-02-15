@@ -1,0 +1,25 @@
+---
+title: ''
+author: 'William Komu'
+date: '`r Sys.Date()`'
+output:
+  pagedown::html_paged:
+    self_contained: false
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning=FALSE
+)
+```
+
+```{r load_pkgs}
+library(tidyverse)
+```
+
+```{rload_data}
+
+```
