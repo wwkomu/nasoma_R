@@ -89,32 +89,32 @@ to replicate that effect!
 ```{r engineering_last_Dec/next_Jan}
 # last_Dec
 
-last_dec <- t_diff %>%
-    filter(month == "Dec") %>%
-    mutate(year = year + 1, month = "last_Dec")
+# last_dec <- t_diff %>%
+#     filter(month == "Dec") %>%
+#     mutate(year = year + 1, month = "last_Dec")
 
-# next_Jan
+# # next_Jan
 
-next_jan <- t_diff %>%
-    filter(month == "Jan") %>%
-    mutate(year = year - 1, month = "next_Jan")
+# next_jan <- t_diff %>%
+#     filter(month == "Jan") %>%
+#     mutate(year = year - 1, month = "next_Jan")
 
 # Join/bind the three dfs
 ## Then pipe the joint_df into ggplot
 
-joint_t_diff <- bind_rows(last_dec, t_diff, next_jan) %>%
+t_data <- t_diff  %>% #bind_rows(last_dec, t_diff, next_jan) %>%
     mutate(
         month = factor(month, levels = c("last_Dec", month.abb, "next_Jan")),
         month_number = as.numeric(month) - 1,
         is_this_year = year == this_year
     )
 
-annotation <- joint_t_diff %>%
-    slice_max(is_this_year) %>%
-    slice_max(month_number)
+# annotation <- joint_t_diff %>%
+#     slice_max(is_this_year) %>%
+#     slice_max(month_number)
 
-joint_t_diff %>%
-    filter(year == 2023)
+# joint_t_diff %>%
+#     filter(year == 2023)
 ```
 
 ### Initial draft plot
@@ -131,21 +131,21 @@ t_diff %>%
 
 # Save to help us view the effect of the alteration we do!
 
-# ggsave("charts/skeleton_plot_global_temp_anomalies.png", width = 6, height = 2)
+# ggsave("charts/skeleton_climate_spiral.png", width = 6, height = 2)
 ```
 
 ### Final plot
 
 ```{r global_t_anomalies_plt}
-joint_t_diff %>%
+  t_data %>%
     ggplot(aes(month_number, t_diff, group = year, color = year, size = is_this_year)) +
     geom_hline(yintercept = 0, color = "white") +
     geom_line() +
-    geom_text(data = annotation, aes(month_number, t_diff, label = year, color = year), inherit.aes = FALSE,
-    hjust = 0, size = 5,
-    nudge_x = -1,
-    nudge_y = .1,
-    fontface = "bold") +
+    #geom_text(data = annotation, aes(month_number, t_diff, label = year, color = year), inherit.aes = FALSE,
+    # hjust = 0, size = 5,
+    # nudge_x = -1,
+    # nudge_y = .1,
+    # fontface = "bold") +
     scale_x_continuous(
         breaks = 1:12,
         labels = month.abb,
@@ -184,7 +184,7 @@ joint_t_diff %>%
     )
 # Save to help us view the effect of the alteration we do!
 
-# ggsave("charts/global_temp_anomalies.png", width = 8, height = 4.5)
+ggsave("charts/climate_spiral.png", width = 8, height = 4.5)
 
 # theme_void()
 ```

@@ -26,11 +26,9 @@ Taking the autobaurn, albeit in a horse back! :monkey:
 
 ## Asides
 
+`ls -[]()`
 
-
-ls -[]()
-
--[]()
+`-[]()`
 
 While i was entering the profs `ls` and `ls -l` and `ls -lth` (sort by time and print human-friendly) I discovered `-l` in this env gmd instert the
 
@@ -79,9 +77,9 @@ unzip -n -d data/raw/ data/raw/"$archive".zip
 The final code is like:
 
 :: First lesson to drying your code - that's, make ur code less repetitive:
-      :SOS: A big area for me to consider being extremely attentive because I have thousands of scripts all over my computer and it has been a few days!   
+      :SOS: A big area for me to consider being extremely attentive because I have thousands of scripts all over my computer and it has been a few days!
 
-  :key: Know your weakness and focus on it!  
+  :key: Know your weakness and focus on it!
 
   **Cliche,** huh?
 
@@ -138,7 +136,7 @@ solution is to use *meta chars* `.` and `*`
 
 How do we get the paths
 
-`echo $target | sed -E "s/(.*\/).*/\1/"` 
+`echo $target | sed -E "s/(.*\/).*/\1/"`
 
 `parethesis`  wraps what we want that matches the wrap
 
