@@ -89,9 +89,9 @@ to replicate that effect!
 ```{r engineering_last_Dec/next_Jan}
 # last_Dec
 
-# last_dec <- t_diff %>%
-#     filter(month == "Dec") %>%
-#     mutate(year = year + 1, month = "last_Dec")
+last_dec <- t_diff %>%
+    filter(month == "Dec") %>%
+    mutate(year = year + 1, month = "last_Dec")
 
 # # next_Jan
 
@@ -102,7 +102,7 @@ next_jan <- t_diff %>%
 # Join/bind the three dfs
 ## Then pipe the joint_df into ggplot
 
-t_data <- bind_rows(t_diff, next_jan) %>%
+t_data <- bind_rows(last_dec, t_diff, next_jan) %>%
     mutate(
         month = factor(month, levels = c(month.abb, "next_Jan")),
         month_number = as.numeric(month),

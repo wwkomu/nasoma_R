@@ -1,0 +1,387 @@
+---
+title: "Using ggplot2 to recreate a line plot of annual temperature anomalies-CC217"
+author: 'William Komu'
+date: '`r Sys.Date()`'
+document: pdf_doc
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+```{r load_pkgs}
+library(tidyverse)
+library(ggplot2)
+library(glue)
+library(lubridate)
+library(gganimate)
+```
+
+## Session Summary
+
+"Pat recreates animated climate spirals of the annual temperature anomalies by month using NASA’s GISS data using tools from the ggplot2 and gganimate R packges. This figure shows the deviation in annual global mean temperatures from the normalized temperatures of 1951 to 1980 as a line plot. The lines are colored according to the year. He uses `transition_reveal`, `transition_manual`, `coord_polar`, `geom_rect`, `geom_line`, `scale_color_viridis_c`, and a smattering of arguments from the `theme` function to create this provocative visual. All of this is done in R with the help of RStudio."
+
+### Load data and tidy
+
+We need to load the data and tidy it to put the data in a long format... `pivot_longer`
+The code `mutate(month = factor(month, levels = month.abb))` turns the months into numerical order rather than the alphabetical order they come out with in the first instance!
+
+
+```{r load_data}
+t_diff <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/climate/data/GLB.Ts+dSST.csv", skip = 1, na = "***") %>%
+    select(year = Year, month.abb) %>%
+    pivot_longer(-year, names_to = "month", values_to = "t_diff") %>%
+    mutate(month = factor(month, levels = month.abb))
+```
+
+
+### Preloaded vectors
+
+The `month.abb` reports the abbreviated vec of the 12 months!
+
+```{r test pre-loaded vec}
+month.abb
+```
+
+### Programming `glue` objects
+
+We can program some elements of the charts and insert them into our ggplot
+
+```{r programming_vars}
+this_year <- year(today()) - 1
+
+min_year <- t_diff %>%
+    summarise(year = min(year))
+
+plot_tt <- glue("Global temparature change (1880-2022)")
+```
+
+
+### Rewind
+
+This session is a continuation  of the previous two sessions CC217 - 218. It looks to make the spiral plot we made in session CC218 to go alive by animating it!
+
+#### Changes and updates
+
+Since we already have the spiral plot, albeit a static one, we will almost borrow the entire code from the previous session with minor changes! These are:
+1. Remove the year 1879 from our `t_data` because it actully returns data for the 1880!
+   `filter or select not 1879`
+2. Change the ungroup by year and do it with ....
+3. Use `mutate` to create a whole new column --- an index row_id using as follows:
+
+`mutate(steps_ = 1: nrow(.))`
+
+```{r engineering_last_Dec/next_Jan}
+# last_Dec
+
+# last_dec <- t_diff %>%
+#     filter(month == "Dec") %>%
+#     mutate(year = year + 1, month = "last_Dec")
+
+# # next_Jan
+
+next_jan <- t_diff %>%
+    filter(month == "Jan") %>%
+    mutate(year = year - 1, month = "next_Jan")
+
+# Join/bind the three dfs
+## Then pipe the joint_df into ggplot
+
+t_data <- bind_rows(t_diff, next_jan) %>%
+    mutate(
+        month = factor(month, levels = c(month.abb, "next_Jan")),
+        month_number = as.numeric(month),
+        is_this_year = year == this_year
+    ) %>%
+    arrange(desc(month_number)) %>%
+        filter(year != 1879) %>%
+        mutate(step_number = 1:nrow(.))
+
+t_data %>% tail()
+
+annotation <- t_data %>%
+    slice_max(year) %>% # Return to year because we got rid of the last_Dec
+    slice_max(month_number)
+
+# joint_t_diff %>%
+#     filter(year == 2023)
+```
+
+### Initial draft plot
+
+Let's plug the data to ggplot and display a skeleton of our draft plot, so that we can tell a kind of a story of the transition to the final draft.
+
+Note: the `group` allows for plotting lines in `geom_line()`
+
+### Final plot
+
+#### Dummy tible
+1. This tibble creates coordinates to pass into `geom_label` (_text too???) as labels to the outer red rings!!
+2. The second is a df for months name and position
+
+**NOTE:** Since ggplot2 takes any addition of `geom_()` as a layer, the sequence in which we put the `geom_()` argms determine the lower and uppeer, where the first arg is lower and the subseqs uppers. The dfs we create below will go on top of the `geom_line()`
+
+```{r}
+temp_lines <- tibble(
+    x = 12,
+    y = c(1.5, 2.0),
+    labels = c("1.5\u00B0C", "2.0\u00B0C")
+)
+
+month_labels <- tibble(
+    x = 1:12,
+    labels = month.abb,
+    y = 2.7
+)
+```
+
+```{r spiral_anim_plt}
+t_data %>%
+    ggplot(aes(month_number, t_diff, group = year, color = year)) +
+     geom_col(data = month_labels, aes(x = x + .5, y = 2.4), fill = "black", width = 1, inherit.aes = FALSE) +
+     geom_col(data = month_labels, aes(x = x + .5, y = -2), fill = "black", width = 1, inherit.aes = FALSE) +
+     geom_hline(yintercept = c(1.5, 2.0), color = "red") +
+     geom_point(
+         data = annotation, aes(
+             x = month_number, y = t_diff,
+             color = year
+         ),
+         size = 5,
+         inherit.aes = FALSE
+     ) +
+      geom_label(
+         data = temp_lines, aes(
+             x = x, y = y,
+             label = labels
+         ),
+         color = "red", fill = "black",
+         label.size = 0,
+         inherit.aes = FALSE
+     ) +
+     geom_text(
+         data = month_labels,
+         aes(
+             x = x,
+             y = y,
+             label = labels
+         ),
+         inherit.aes = FALSE,
+         color = "white",
+         angle = seq(360 - 360 / 12, 0, length.out = 12),
+     ) +
+    geom_line() +
+     geom_text(aes(x = 1, y = -1.3, label = "2022")) +
+     scale_x_continuous(
+         breaks = 1:12,
+         labels = month.abb, expand = c(0, 0),
+         sec.axis = dup_axis(name = NULL, labels = NULL)
+     ) +
+    scale_y_continuous(
+        breaks = seq(-2, 2, 0.2),
+        limits = c(-2, 2.7), expand = c(0, -0.7),
+        sec.axis = dup_axis(name = NULL, labels = NULL)
+    ) +
+    scale_color_viridis_c(
+        breaks = seq(1880, 2022, 20),
+        guide = "none"
+    ) +
+    scale_size_manual(
+        breaks = c(FALSE, TRUE),
+        values = c(0.25, 1),
+        guide = "none"
+    ) +
+    coord_polar(start = 2 * pi / 12) +
+        # coord_cartesian(xlim = c(1, 12)) +
+    labs(x = NULL, y = NULL) +
+        # ggtitle(label = glue("Global temparature change since {min_year} by month")) +
+    ggtitle(plot_tt) +
+    theme(
+            panel.background = element_rect(fill = "#444444", size = 1),
+            plot.background = element_rect(fill = "#444444", color = "#444444"),
+            panel.grid = element_blank(),
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank(),
+            axis.title = element_text(color = "white", size = 13),
+            plot.title = element_text(color = "white", hjust = 0.5, size = 15),
+        ) +
+        transition_reveal(along = step_number)
+
+file_renderer(dir = ".", prefix = "climate_anima_plot", overwrite = FALSE)
+
+# Save to help us view the effect of the alteration we do!
+
+# ggsave("charts/climate_spiral_animated.png", width = 10, height = 5)
+```
+
+
+# Commentary
+
+To keep my code chucks clean, I'll start doing commentaries - explanations of the ***not-so-obvious*** **code lines and tricks** or nifty tricks that I have a feeling are **outta this world** - at the end of the document.
+
+### My adaptation:
+In subsetting the data for the annotation trick, I adapted `is_this_year` because I am in 2023 which has no data other than the `last_Dec` we created!
+
+In subsetting this year, I had to deduct one (-1) so that I can get last year's as this year! I will amend this line once i have a dataset that has data for 2023!
+NOTE: last_Dec takes the previous years data and put it as a month 0, helping as to showcased a kind of transition/action in the edge of the plot!
+
+### Read the end of df
+Print the tail end of a df, where n = # of rows!
+`data  %>% tail(n=#)`
+
+```{r}
+# t_diff %>% tail(n = 10)
+```
+
+```{r}
+# ?theme(plot.title.position)
+```
+
+
+^[THIS IS A FOOTNOTE]
+
+The format_document features does not always work when you have made a syntax error! Thus, it is a nice little **"bug buster"**, huh?
+Change the angle of the text labels
+
+`seq(0, 360 - 360 / 12, length.out = 12)`
+
+# Get a circle
+
+How about adding a circle behind our spiral to get the circular shape of the Hopkin's plot!
+
+
+
+```{r}
+# ggplot(data = month_labels, aes(x = x, y = 2.2), fill = "black") +
+#     geom_col() +
+#     coord_polar()
+```
+
+# CLEAN TO RUN WITH r
+
+library(tidyverse)
+library(ggplot2)
+library(glue)
+library(lubridate)
+library(gganimate)
+
+t_diff <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/climate/data/GLB.Ts+dSST.csv", skip = 1, na = "***") %>%
+    select(year = Year, month.abb) %>%
+    pivot_longer(-year, names_to = "month", values_to = "t_diff") %>%
+    mutate(month = factor(month, levels = month.abb))
+
+# last_Dec
+
+ last_dec <- t_diff %>%
+     filter(month == "Dec") %>%
+     mutate(year = year + 1, month = "last_Dec")
+
+# # next_Jan
+
+next_jan <- t_diff %>%
+    filter(month == "Jan") %>%
+    mutate(year = year - 1, month = "next_Jan")
+
+# Join/bind the three dfs
+## Then pipe the joint_df into ggplot
+
+t_data <- bind_rows(t_diff, next_jan) %>%
+    mutate(
+        month = factor(month, levels = c(month.abb, "next_Jan")),
+        month_number = as.numeric(month),
+        is_this_year = year == this_year
+    ) %>%
+    arrange(desc(month_number)) %>%
+    filter(year != 1879) %>%
+    mutate(step_number = 1:nrow(.))
+
+annotation <- t_data %>%
+    slice_max(year) %>% # Return to year because we got rid of the last_Dec
+    slice_max(month_number)
+
+temp_lines <- tibble(
+    x = 12,
+    y = c(1.5, 2.0),
+    labels = c("1.5\u00B0C", "2.0\u00B0C")
+)
+
+month_labels <- tibble(
+    x = 1:12,
+    labels = month.abb,
+    y = 2.7
+)
+
+t_data %>%
+    ggplot(aes(month_number, t_diff, group = year, color = year)) +
+     geom_col(data = month_labels, aes(x = x + .5, y = 2.4), fill = "black", width = 1, inherit.aes = FALSE) +
+     geom_col(data = month_labels, aes(x = x + .5, y = -2), fill = "black", width = 1, inherit.aes = FALSE) +
+     geom_hline(yintercept = c(1.5, 2.0), color = "red") +
+     geom_point(
+         data = annotation, aes(
+             x = month_number, y = t_diff,
+             color = year
+         ),
+         size = 5,
+         inherit.aes = FALSE
+     ) +
+      geom_label(
+         data = temp_lines, aes(
+             x = x, y = y,
+             label = labels
+         ),
+         color = "red", fill = "black",
+         label.size = 0,
+         inherit.aes = FALSE
+     ) +
+     geom_text(
+         data = month_labels,
+         aes(
+             x = x,
+             y = y,
+             label = labels
+         ),
+         inherit.aes = FALSE,
+         color = "white",
+         angle = seq(360 - 360 / 12, 0, length.out = 12),
+     ) +
+    geom_line() +
+     geom_text(aes(x = 1, y = -1.3, label = "2022")) +
+     scale_x_continuous(
+         breaks = 1:12,
+         labels = month.abb, expand = c(0, 0),
+         sec.axis = dup_axis(name = NULL, labels = NULL)
+     ) +
+    scale_y_continuous(
+        breaks = seq(-2, 2, 0.2),
+        limits = c(-2, 2.7), expand = c(0, -0.7),
+        sec.axis = dup_axis(name = NULL, labels = NULL)
+    ) +
+    scale_color_viridis_c(
+        breaks = seq(1880, 2022, 20),
+        guide = "none"
+    ) +
+    scale_size_manual(
+        breaks = c(FALSE, TRUE),
+        values = c(0.25, 1),
+        guide = "none"
+    ) +
+    coord_polar(start = 2 * pi / 12) +
+        # coord_cartesian(xlim = c(1, 12)) +
+    labs(x = NULL, y = NULL) +
+        # ggtitle(label = glue("Global temparature change since {min_year} by month")) +
+    ggtitle(plot_tt) +
+    theme(
+            panel.background = element_rect(fill = "#444444", size = 1),
+            plot.background = element_rect(fill = "#444444", color = "#444444"),
+            panel.grid = element_blank(),
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank(),
+            axis.title = element_text(color = "white", size = 13),
+            plot.title = element_text(color = "white", hjust = 0.5, size = 15),
+        ) +
+        transition_reveal(along = step_number)
