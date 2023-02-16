@@ -22,7 +22,7 @@ library(ggplot2)
 library(gganimate)
 library(gifski)
 
-options(browser = "firefox")
+options(browser = "Microsoft Edge")
 
 data(gapminder)
 
@@ -34,9 +34,8 @@ p <- ggplot(
     scale_color_viridis_d() +
     scale_size(range = c(2, 12)) +
     scale_x_log10() +
-    labs(x = "GDP per capita", y = "Life expectancy")
-p + transition_time(year)
+    labs(x = "GDP per capita", y = "Life expectancy")+
+    transition_time(year)
 
-ggsave("anime.gif")
-
+animate(p, "anime.gif", renderer = gifski_renderer())
 ```

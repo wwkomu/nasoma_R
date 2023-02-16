@@ -3,6 +3,8 @@ library(gifski)
 library(av)
 library(gganimate)
 
+options(browser = "msedge")
+
 # t_diff <- read_csv("data/GLB.Ts+dSST.csv")
 
 data_homo <- read_csv("data/temp_data.csv")
