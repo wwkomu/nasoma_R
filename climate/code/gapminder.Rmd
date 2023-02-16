@@ -1,11 +1,31 @@
+---
+title: ''
+author: 'William Komu'
+date: '`r Sys.Date()`'
+document: github_md
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning=FALSE
+)
+```
+
+```{r}
 library(tidyverse)
 library(ggplot2)
 # install.packages("gapminder")
 library(gapminder)
 library(ggplot2)
 library(gganimate)
+library(gifski)
+
+options(browser = "firefox")
 
 data(gapminder)
+
 p <- ggplot(
     gapminder,
     aes(x = gdpPercap, y = lifeExp, size = pop, colour = country)
@@ -16,3 +36,7 @@ p <- ggplot(
     scale_x_log10() +
     labs(x = "GDP per capita", y = "Life expectancy")
 p + transition_time(year)
+
+ggsave("anime.gif")
+
+```
