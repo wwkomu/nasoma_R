@@ -1,0 +1,21 @@
+---
+title: "Plotting the global temperature index using ggplot2 and NASA GISS data (CC214)"
+author: 'William Komu'
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    self_contained: false
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+# Purpose: To Document Session 213
+
+Although I went ahead and did sessions 217 >, which advances this session (C213), I will go ahead and work through this one to have a order in my quest to ***"Peek at the mind of an R maestro"!*** Preferably, I will handle this one by myself! That is, without checking the video by the Prof!
