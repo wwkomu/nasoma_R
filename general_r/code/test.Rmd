@@ -1,0 +1,70 @@
+---
+title: Test if I can knit PDF
+author: William Komu
+document: PDF-doc
+---
+
+## Loading the Requisite Packages
+
+Loading packages is crucial to avoid gettting into issues when you start your analysis. Thus, I always start a new doc with a chuck importing all the packages that I would use!
+
+```{r}
+library(tidyverse)
+```
+
+Sure Enough, this one is knitting perfectly! Thus, the one that is not knitting must be labouring with some weird settings!!!
+
+## Add More Details
+
+1. ADD THE SETUP CHUCK
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE
+)
+# This setup covers the whole document!
+# Forbids the code from displaying!
+
+```
+
+Let's try and knit with the added setup chuck above!
+
+**It still knits**
+
+2. ADD THE emojis
+
+<!-- `r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")`
+`r emo::ji("star")` -->
+
+Let's try and knit with emojis:
+
+The emojis have killed it! Let me see if I can ***settle this issue out***!
+- First, comment the emojis out!
+
+It prints with the emojis commented!
+
+- add emojis as standalone code chucks
+
+```{r}
+
+emo::ji("star")
+
+```
+
+# TENTATIVE FINDINGS
+
+The emojis are preventing me from knitting to pdf! 
