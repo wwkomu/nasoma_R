@@ -1,4 +1,3 @@
-
 # CLEAN TO RUN WITH r
 
 library(ggplot2)
@@ -27,7 +26,7 @@ next_jan <- t_diff %>%
 # Join/bind the three dfs
 ## Then pipe the joint_df into ggplot
 
-this_year=year(today())-1
+this_year <- year(today()) - 1
 
 step_index <- data.frame(step_num = c(1:1858))
 
@@ -38,9 +37,9 @@ t_data <- bind_rows(t_diff, next_jan) %>%
   ) %>%
   filter(year != 1879) %>%
   arrange(year, month) %>%
-  mutate(step_numb="NA")
+  mutate(step_numb = "NA")
 
-t_data$step_numb[which(t_data$step_numb=='NA')] <- as.numeric(1:1858)
+t_data$step_numb[which(t_data$step_numb == "NA")] <- as.numeric(1:1858)
 
 annotation <- t_data %>%
   slice_max(year) %>% # Return to year because we got rid of the last_Dec
@@ -138,7 +137,7 @@ write_csv(t_data, file = "temp_data.csv")
 
 
 tt_data %>%
-  ggplot(aes(month_number, t_diff, group = year, color=year))+
+  ggplot(aes(month_number, t_diff, group = year, color = year)) +
   # geom_col(data = month_labels, aes(x = x + .5, y = 2.4), fill = "black", width = 1, inherit.aes = FALSE) +
   # geom_col(data = month_labels, aes(x = x + .5, y = -2), fill = "black", width = 1,
   #          inherit.aes = FALSE) +
@@ -171,7 +170,7 @@ tt_data %>%
   #   color = "white",
   #   angle = seq(360 - 360 / 12, 0, length.out = 12),
   # )+
-  geom_line()+
+  geom_line() +
   geom_text(aes(x = 1, y = -1.3, label = year)) +
   scale_x_continuous(
     breaks = 1:12,
@@ -192,7 +191,7 @@ tt_data %>%
   #   values = c(0.25, 1),
   #   guide = "none"
   # ) +
-  coord_polar(start = 2 * pi / 12)+
+  coord_polar(start = 2 * pi / 12) +
   theme(
     panel.background = element_rect(fill = "#444444", size = 1),
     plot.background = element_rect(fill = "#444444", color = "#444444"),
@@ -202,7 +201,7 @@ tt_data %>%
     axis.ticks = element_blank(),
     axis.title = element_text(color = "white", size = 13),
     plot.title = element_text(color = "white", hjust = 0.5, size = 15),
-  )+
+  ) +
   transition_manual(along = step_num)
 
 
