@@ -16,6 +16,16 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r load_pks}
+library(tidyverse)
+```
+
 # Purpose: To Document Session 213
 
-Although I went ahead and did sessions 217 >, which advances this session (C213), I will go ahead and work through this one to have a order in my quest to ***"Peek at the mind of an R maestro"!*** Preferably, I will handle this one by myself! That is, without checking the video by the Prof!
+Although I went ahead and did sessions 217 >, which advances this session (C213), I will go ahead and work through this one to have a order in my quest to ***"Take a peek into the mind of an R maestro"!*** Preferably, I will handle this one by myself! That is, without checking the video by the Prof!
+
+# The Dataset
+
+```{r}
+read.csv("/home/iamlnx/Documents/GitHub/nasoma_R/climate/data/GLB.Ts+dSST.csv", skip = 1, na = "***")
+```
