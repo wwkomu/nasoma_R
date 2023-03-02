@@ -1,0 +1,204 @@
+---
+title: 'Privy Practice: Visualization and Statistical Analysis of Global Life Expectancy World Bank Data in R'
+author: 'William Komu'
+date: '`r Sys.Date()`'
+document:
+  pdf_document:
+    self_contained: false
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE
+)
+options(browser = "firefox")
+```
+
+# Introduction
+This exercise attempts to visualise the global life expectancy and conduct a variety of statistical tests to compare the life expectancy of among a select countries. The primary purpose is to compare how life expectancy in Kenya has changes over the years!!
+
+## Loading packages
+Like any other R-related exercise, it is a prerequisite that we load the various packages that are going to enable the functionality that we need to successfully conduct this exercise! Like usual, I will load the <font color="dodgerblue">`tidyverse`</font>.
+
+## The environment
+
+Like usual, I have almost all the required packages install on my <font color="dodgerblue">`nasoma_r` </font> env, which is a **<font color="dodgerblue"> conda/mamba </font>** environment!
+### Loading packages
+The chuck below loads the packages that I need or could need as I take on this exercise!
+```{r load_pkgs}
+library(tidyverse)
+library(janitor)
+library(ggthemes)
+library(lubridate)
+library(gganimate)
+```
+
+## Color pallete
+
+I had copied two color palette, which supposedly show empathy to those with color blindness, from [this site](example.com)! They are based on a few colors with a base of `gray` and `black`! I went on and saved them as snippets.
+
+I load them below:
+
+```{r load_my_color_palette}
+cb_palette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+cbb_palette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+## Load Data
+The data is a csv file that I downloaded from the WB data repo.
+
+```{r loads_data}
+my_gapminder <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/global_health_indicators/data/LifeExp_WorldBank.csv", skip = 4) %>%
+    select(-"Country Code", -"Indicator Name", -"Indicator Code") %>%
+    pivot_longer(-"Country Name", names_to = "year", values_to = "life_exp") %>%
+    clean_names() %>%
+    mutate(
+        country = country_name,
+        year = as.numeric(year)
+    ) %>%
+    group_by(country) %>%
+    select(country, year, life_exp) %>%
+    drop_na()
+```
+
+# VISUALIZATION
+## Life expectancy - Kenya alone
+
+This one is not a refined copy. I have hidden the code that generates it!
+
+
+```{r}
+ke_p <- nsr +
+    geom_line(show.legend = FALSE) +
+    geom_point(fill = "white", shape = 18, size = 2, show.legend = FALSE) +
+    # shape enables the white fill!
+    scale_x_continuous(breaks = seq(1960, 2030, by = 10), expand = c(0, 1)) +
+    coord_cartesian(clip = "off") +
+    scale_y_continuous(limits = c(45, 70), expand = c(0, 0)) +
+    labs(
+        title = "Kenya's life expectancy from 1960 to 2020",
+        x = "Year",
+        y = "Average life expectancy (years)",
+        caption = "Data source: World Bank"
+    ) +
+    theme_clean() +
+        theme(
+            plot.title = element_text(margin = margin(b = 10)),
+            plot.title.position = "plot",
+            axis.text = element_text(margin = margin(b = 10))
+        ) +
+    transition_reveal(along = year)
+
+ggsave("figures/kenya_life_exp_1960-2020.png", width = 6.5, height = 3.5, unit = "in")
+
+# Animate and save .gif
+
+animate(ke_p, width = 6.5, height = 4.5, unit = "in", res = 300)
+
+anim_save("figures/climate_spiral_animated_nasa.gif")
+```
+
+## Comparison
+### East Africa countries
+
+```{r echo = TRUE}
+my_gapminder %>%
+    filter(country %in% c("Kenya", "Tanzania", "Uganda")) %>%
+    drop_na() %>%
+    ggplot(aes(year, life_exp, group = country)) +
+    geom_line(aes(color = country), show.legend = TRUE, size = 0.5) +
+    geom_point(aes(color = country), show.legend = TRUE, size = 1, shape = 16) +
+    # geom_smooth(se = FALSE, span = 0.1) +
+    scale_x_continuous(breaks = seq(1960, 2030, by = 10), expand = c(0, 1)) +
+    coord_cartesian(clip = "off") +
+    scale_y_continuous(limits = c(40, 70), expand = c(0, 0)) +
+    scale_color_manual(breaks = c("Kenya", "Tanzania", "Uganda"), values = c(cbb_palette)) +
+    labs(
+        title = "Life expectancy from 1960 to 2020",
+        subtitle = "Kenya's versus other East African countries",
+        x = "Year",
+        y = "Average life expectancy (in years)",
+        caption = "Data source: World Bank"
+    ) +
+    theme_classic() +
+    theme(
+        plot.title = element_text(margin = margin(b = 10)),
+        plot.title.position = "plot",
+        axis.text = element_text(margin = margin(b = 10)),
+        plot.subtitle = element_text(size = 10, margin = margin(b = 15)),
+        legend.position = c(0.9, 0.15), # Moves the legend to the top right inside chart area!
+        legend.title = element_blank() # Removes the legend title, country
+    )
+
+# Save `.png` of the plot
+
+ggsave("figures/cbb_global_life_exp_Kenya_vs_others_1960-2020.png", width = 4.5, height = 4.5, unit = "in")
+```
+
+## cb_palette - gray
+
+The code below replicates the above chart, albeit using the **<font color="gray">gray</font>** variation color palette
+
+
+```{r echo = TRUE}
+my_gapminder %>%
+    filter(country %in% c("Kenya", "Tanzania", "Uganda")) %>%
+    drop_na() %>%
+    ggplot(aes(year, life_exp, group = country)) +
+    geom_line(aes(color = country), show.legend = TRUE, size = 0.5) +
+    geom_point(aes(color = country), show.legend = TRUE, size = 1, shape = 16) +
+    # geom_smooth(se = FALSE, span = 0.1) +
+    scale_x_continuous(breaks = seq(1960, 2030, by = 10), expand = c(0, 1)) +
+    coord_cartesian(clip = "off") +
+    scale_y_continuous(limits = c(40, 70), expand = c(0, 0)) +
+    scale_color_manual(breaks = c("Kenya", "Tanzania", "Uganda"), values = c(cb_palette)) +
+    labs(
+        title = "Life expectancy from 1960 to 2020",
+        subtitle = "Kenya's versus other East African countries",
+        x = "Year",
+        y = "Average life expectancy (in years)",
+        caption = "Data source: World Bank"
+    ) +
+    theme_classic() +
+    theme(
+        plot.title = element_text(margin = margin(b = 10)),
+        plot.title.position = "plot",
+        axis.text = element_text(margin = margin(b = 10)),
+        plot.subtitle = element_text(size = 10, margin = margin(b = 15)),
+        legend.position = c(0.9, 0.15), # Moves the legend to the top right inside chart area!
+        legend.title = element_blank() # Removes the legend title, country
+    )
+# Save the gray variation
+
+ggsave("figures/cb_global_life_exp_Kenya_vs_others_1960-2020.png", width = 4.5, height = 4.5, unit = "in")
+```
+
+## STATS ANALYSIS
+
+H0: There is no statistically significant difference in life expectancy between Kenya and the rest of East Africa
+H1: There is a statistically significant difference in life expectancy of Kenya compared to the rest of East Africa
+
+```{r}
+
+```
+
+# COMMENTARY
+
+- In the code line `geom_point(fill = "", color = "", shape = 21)`, the entry `shape = 21` enables the plot **symbol = circle** and without it we do no get the white fill! Meeeh! This code line does not really apply in this plot it is borrowed by the idea is the same!
+- I dont have to include the two `geom_line` and `geom_point`. I only have `geom_point` for the sake of testing the various shapes!
+- Ignore my love (infatuation? Anyone?) for the drammatic `!`.
+- the drammatic difference between the charts is enable by the minute change in code line 149 above!! The beauty of R-programming, huh?axis.text
+- Finally, I have about 10 minutes to ride to town and catch the ARSENAL's #TeamKubwa revenge game! HAHAHA! BYE BYE FOR NOW WADAU!
+
+# UPDATES
+Game ya #TeamKubwa imeweza kuweza!!!! <font color = "darkred">#COYG</font>. No wonder, **<font color = "darkred">LONDON</font>** is **<font color = "darkred">RED</font>**!!
+```{r}
+kenya_china <- my_gapminder %>%
+    filter(country %in% c("Rwanda", "Tanzania")) %>%
+    drop_na()
+
+t.test(data = kenya_china, life_exp ~ country)
+```
