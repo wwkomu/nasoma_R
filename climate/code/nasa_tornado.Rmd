@@ -1,0 +1,102 @@
+---
+title: "NASA's Climate Tornado"
+author: 'William Komu'
+date: '`r Sys.Date()`'
+document:
+  pdf_document:
+    self_contained: false
+    toc: false
+---
+## Intro
+
+This exercise is an attempt to recreate the tornado end of the NASA's animated spiral, which is a chart of the global temperature change going back to 1880! This exercise is a riffed copy of Prof P. Scholls' Riffomonas Project Code Club (CCXXX)! I have included a few mods!
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+
+
+```{r , echo = FALSE}
+library(tidyverse)
+library(gganimate)
+options(browser = "firefox")
+```
+
+
+```{r load_data}
+# Loading data.csv
+
+t_data <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/climate/data/GLB.Ts+dSST.csv", skip = 1, na = "***") %>%
+    select(year = Year, all_of(month.abb)) %>%
+    pivot_longer(-year, names_to = "month", values_to = "t_diff") %>%
+    drop_na()
+```
+
+
+
+```{r}
+# Subsetting for geom_labs & geom_text
+
+grid_labels <- tibble(x = c(-5, -4, 0, 1), y = c(2030), labels = c("+1\u00B0 C", "0\u00B0 C", "0\u00B0 C", "+1\u00B0 C"))
+year_labels <- tibble(x = -2, y = c(seq(1880, 2000, by = 20), 2023))
+
+# Plotting
+
+t_data %>%
+    filter(month == "Apr" | month == "Oct") %>%
+    pivot_wider(names_from = "month", values_from = "t_diff") %>%
+    mutate(t_ave = (Apr + Oct) / 2) %>%
+    ggplot(aes(x = -4 - Oct, xend = Apr, y = year, yend = year, color = t_ave)) +
+    geom_vline(xintercept = c(-5, -4, 0, 1), color = "gold") +
+    geom_label(
+        data = grid_labels, aes(x = x, y = y, label = labels), inherit.aes = FALSE,
+        fill = "black", color = "gold", label.size = 0, size = 3
+    ) +
+    geom_segment(size = 0.9, lineend = "round") +
+    geom_text(
+        data = year_labels, aes(x = x, y = y, label = y),
+        inherit.aes = FALSE, color = "gold", size = 3, fontface = "bold"
+    ) +
+    scale_color_gradient2(
+        low = "darkblue", mid = "white", high = "darkred",
+        midpoint = 0, guide = "none"
+    ) +
+    scale_y_continuous(limits = c(NA, 2030), expand = c(0, 0)) +
+    coord_cartesian(clip = "off") +
+    labs(x = NULL, y = NULL) +
+    theme(
+        plot.background = element_rect(fill = "black", colour = "black"),
+        panel.background = element_rect(fill = "black", color = "black"),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank()
+    )
+
+# Saving the plot as a .png
+
+ggsave("figures/raw/climate_tornado_nasa.png", width = 4.5, height = 3.5, units = "in", dpi = 300)
+```
+
+# Commentary
+
+## NOTE:
+I am doing this in 2023, meaning that I don't have any `na` values - that is, I have complete data as of December 2022!
+
+## Tricks and Treats
+
+### `scale_y_continuous(limits = c(NA, 2030), expand = c(0,0))`
+
+The `expand=c(0,0)`, removes the extension at the bottom and tht top, thus, we added 2030 to the limits to go 7 years into the future, hence opening up the extensions at the top!
+
+# Issue
+
+The coloring of the years labels is a bit washed out, meaning kinda off!! Maybe we could add a text outline to fix it!
+
+# Reference
+
+- The Riffomonas Project

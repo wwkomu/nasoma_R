@@ -30,13 +30,15 @@ kenya_prcp <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/climate/data/keny
 
 
 ```{r}
-  ggplot(kenya_prcp, aes(x = year, group = year, y = avg_prcp, color = year)) +
-    geom_point() +
+  ggplot(kenya_prcp, aes(x = year,  y = avg_prcp, color = avg_prcp)) +
+    geom_line() +
     theme_economist() +
-    geom_smooth(span = .1) +
+    # geom_smooth(span = .1) +
     theme(
       legend.key = element_blank()
-    )
+    ) +
+    scale_x_continuous(limits = c(1991, 2020))
+
   ggsave("avg_prcp_kenya.png", height = 4.5, width = 3.5, unit = "in")
 
 ```

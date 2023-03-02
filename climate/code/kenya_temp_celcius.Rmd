@@ -1,0 +1,49 @@
+---
+title: 'Temparatures anomalies in Kenya 1991-2016'
+author: 'William Komu'
+date: '`r Sys.Date()`'
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE
+)
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(ggthemes)
+```
+
+
+```{r}
+t_diff_ke <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/climate/data/kenya-climate-data-1991-2016-temp-degress-celcius.csv") %>%
+    clean_names() %>%
+    separate_wider_delim(month_average, " ", names = c("month", "stat_type")) %>%
+    rename("ave_t" = temperature_celsius) %>%
+    group_by(year) %>%
+    select(year, month, ave_t) %>%
+    mutate(month = as.factor(month.abb)) %>%
+    summarise(ave_t = mean(ave_t)) %>%
+    mutate(
+        normalize_range = year >= 2001 & year <= 2006,
+        normalized_mean = sum(ave_t * normalize_range) / sum(normalize_range),
+        t_diff = ave_t - normalized_mean
+    ) %>%
+    select(year, t_diff) %>%
+        ggplot(aes(year, t_diff, color = t_diff)) +
+        geom_line() +
+        scale_colour_gradient2(low = "darkblue", mid = "white", high = "darkred", midpoint = 0) +
+        scale_y_continuous(limits = c(-1, .75), expand = c(0, 0))+
+        theme(
+            plot.background = element_rect(fill="#000000"),
+            panel.background = element_rect(fill = "#000000"),
+            panel.grid = element_blank()
+        )
+
+
+ggsave("figures/raw/temp_anomalies_kenya.png", width = 6.5, height = 3.75, unit = "in", dpi = 300)
+```
+

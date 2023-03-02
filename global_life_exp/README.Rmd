@@ -1,0 +1,23 @@
+**@PatSchloss**
+
+---
+title: ''
+author: 'William Komu'
+date: '`r Sys.Date()`'
+document:
+  pdf_document:
+    self_contained: false
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+```{r}
+source('code/global_life_exp_data.Rmd', chdir = FALSE)
+
+```

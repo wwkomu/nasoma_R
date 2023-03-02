@@ -1,0 +1,32 @@
+---
+title: ''
+author: 'William Komu'
+date: '`r Sys.Date()`'
+document:
+  pdf_document:
+    self_contained: false
+    toc: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = FALSE,
+    message = FALSE,
+    warning = FALSE
+)
+```
+
+```{r}
+source("/home/iamlnx/Documents/GitHub/nasoma_R/climate/code/kenya_temp_celcius.Rmd")
+```
+```{r}
+t_diff_ke
+```
+
+# TEST
+
+THIS WAS A TEST IF I CAN CARRY OVER A SCRIPT FROM ANOTHER SCRIPT IN THE SAME WORKING DIR.
+
+# OUTCOME:
+
+SUCCESS!!!!!!!!!!!!!!!!!
