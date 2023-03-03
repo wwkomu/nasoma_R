@@ -1,17 +1,20 @@
 ---
-output:
-  reprex::reprex_document:
-    venue: "gh"
-    advertise: FALSE
-    session_info: TRUE
-    style: TRUE
-    comment: "#;-)"
-    tidyverse_quiet: FALSE
-    std_out_err: TRUE
-knit: reprex::reprex_render
+title: ''
+author: 'William Komu'
+date: '`r Sys.Date()`'
+document:
+  pdf_document:
+    self_contained: false
+    toc: false
 ---
 
-This template demonstrates many of the bells and whistles of the `reprex::reprex_document()` output format. The YAML sets many options to non-default values, such as using `#;-)` as the comment in front of output.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
 
 ## Load libraries
 
@@ -23,6 +26,9 @@ library(gifski)
 library(gganimate)
 library(ggplot2)
 library(lubridate)
+
+#options
+options(browser = "firefox")
 ```
 
 ## Quiet tidyverse
@@ -46,16 +52,28 @@ owid_le <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/global_life_exp/data
 
 ```{r}
 kenya_le <- owid_le %>%
-  filter(country %in% c("Kenya", "China", "Singapore")) %>%
+  filter(country %in% c("Kenya")) %>%
   select(year, country, life_expectancy)
 
 kenya_le
 
-kenya_le %>%
-  ggplot(aes(year, life_expectancy,  color = country)) +
-  geom_point() +
+ln_p_ke_anim <- kenya_le %>%
+  ggplot(aes(year, life_expectancy, color = country)) +
+  geom_point(aes(size = life_expectancy), show.legend = FALSE) +
   geom_line(aes(color = country)) +
-  scale_x_continuous(limits = c(1920, 2030), expand = c(0, 0))
+  scale_x_continuous(limits = c(1920, 2030), expand = c(0, 0)) +
+  theme_economist() +
+  theme(
+    axis.text.x.bottom = element_text(margin = margin(b = 10)),
+    axis.text.y.left = element_text(margin = margin(l = 10)),
+    legend.title = element_blank()
+  ) +
+  transition_reveal(along = year)
+
+animate(ln_p_ke_anim)
+
+# theme_void() +nt_te
+# theme(plot.background = element_rect(fill ="white"))
 
 ggsave("figures/kenya_le_owid.png")
 ```
@@ -66,12 +84,6 @@ The code chuck below helps us to preview the extreme ends of the data for the va
 
 ```{r}
 
-mutate(
-    min_le = min(life_expectancy),
-    max_le = max(life_expectancy),
-    min_year = min(year),
-    max_year = max(year)
-  )
 ```
 
 ## kenya_le:

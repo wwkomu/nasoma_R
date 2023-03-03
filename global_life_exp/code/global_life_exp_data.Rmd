@@ -59,7 +59,7 @@ cbb_palette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2
 The data is a csv file that I downloaded from the WB data repo.
 
 ```{r loads_data}
-my_gapminder <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/global_life_exp/data/LifeExp_WorldBank.csv", skip = 4) %>%
+my_gapminder <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/global_life_exp/data/WB/LifeExp_WorldBank.csv", skip = 4) %>%
     select(-"Country Code", -"Indicator Name", -"Indicator Code") %>%
     pivot_longer(-"Country Name", names_to = "year", values_to = "life_exp") %>%
     clean_names() %>%
