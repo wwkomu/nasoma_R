@@ -13,77 +13,74 @@ knit: reprex::reprex_render
 
 This template demonstrates many of the bells and whistles of the `reprex::reprex_document()` output format. The YAML sets many options to non-default values, such as using `#;-)` as the comment in front of output.
 
-## Code style
+## Load libraries
 
-Since `style` is `TRUE`, this difficult-to-read code (look at the `.Rmd` source file) will be restyled according to the Tidyverse style guide when it's rendered. Whitespace rationing is not in effect!
-
-```{r}
-x <- 1
-y <- 2
-z <- x + y
-z
+```{r loads_libs}
+library(tidyverse)
+library(ggthemes)
+library(janitor)
+library(gifski)
+library(gganimate)
+library(ggplot2)
+library(lubridate)
 ```
 
 ## Quiet tidyverse
 
-The tidyverse meta-package is quite chatty at startup, which can be very useful in exploratory, interactive work. It is often less useful in a reprex, so by default, we suppress this.
-
-However, when `tidyverse_quiet` is `FALSE`, the rendered result will include a tidyverse startup message about package versions and function masking.
+Since the `tidyverse` pkg tends to be overly chatty, this is a queit way to call it!
 
 ```{r, eval = requireNamespace("tidyverse", quietly = TRUE)}
 library(tidyverse)
 ```
 
-## Chunks in languages other than R
-
-Remember: knitr supports many other languages than R, so you can reprex bits of code in Python, Ruby, Julia, C++, SQL, and more. Note that, in many cases, this still requires that you have the relevant external interpreter installed.
-
-Let's try Python!
-
-```{python, eval = Sys.which("python") != "", python.reticulate = requireNamespace("reticulate", quietly = TRUE)}
-x = 'hello, python world!'
-print(x.split(' '))
-```
-
-And bash!
-
-```{bash, eval = Sys.which("bash") != ""}
-echo "Hello Bash!";
-pwd;
-ls | head;
-```
-
-Write a function in C++, use Rcpp to wrap it and ...
-
-```{Rcpp, eval = requireNamespace("Rcpp", quietly = TRUE)}
-#include <Rcpp.h>
-using namespace Rcpp;
-
-// [[Rcpp::export]]
-NumericVector timesTwo(NumericVector x) {
-  return x * 2;
-}
-```
-
-then immediately call your C++ function from R!
-
-```{r, eval = requireNamespace("Rcpp", quietly = TRUE)}
-timesTwo(1:4)
-```
-
-## Standard output and error
-
-Some output that you see in an interactive session is not actually captured by rmarkdown, when that same code is executed in the context of an `.Rmd` document. When `std_out_err` is `TRUE`, `reprex::reprex_render()` uses a feature of `callr:r()` to capture such output and then injects it into the rendered result.
-
-Look for this output in a special section of the rendered document (and notice that it does not appear right here).
+## Load data
 
 ```{r}
-system2("echo", args = "Output that would normally be lost")
+owid_le <- read_csv("/home/iamlnx/Documents/GitHub/nasoma_R/global_life_exp/data/OWID/life-expectancy-OWID-data.csv") %>%
+  rename(country = Entity, country_code = Code, year = Year, life_expectancy = "Life expectancy at birth (historical)") %>%
+  mutate(year = as.numeric(as.character(year))) %>%
+  select(year, country, life_expectancy)
 ```
 
-## Session info
+## Kenya
 
-Because `session_info` is `TRUE`, the rendered result includes session info, even though no such code is included here in the source document.
-```{r emoji_test}
-emo::ji("stars")
+```{r}
+kenya_le <- owid_le %>%
+  filter(country %in% c("Kenya", "China", "Singapore")) %>%
+  select(year, country, life_expectancy)
+
+kenya_le
+
+kenya_le %>%
+  ggplot(aes(year, life_expectancy,  color = country)) +
+  geom_point() +
+  geom_line(aes(color = country)) +
+  scale_x_continuous(limits = c(1920, 2030), expand = c(0, 0))
+
+ggsave("figures/kenya_le_owid.png")
 ```
+
+##
+
+The code chuck below helps us to preview the extreme ends of the data for the various countries of interest and the global_le as a whole!
+
+```{r}
+
+mutate(
+    min_le = min(life_expectancy),
+    max_le = max(life_expectancy),
+    min_year = min(year),
+    max_year = max(year)
+  )
+```
+
+## kenya_le:
+- min_year  = 1927
+- max_year  = 2021
+- min_le    = 23.9
+- max_le    = 62.9
+## global_le:
+- min_year  = 1543
+- max_year  = 2021
+- min_le    = 12
+- max_le    = 86.5
