@@ -1,0 +1,66 @@
+library(maps)
+library(ggplot2)
+## make a df with only the country to overlap
+map_data_es <- map_data("world")[map_data("world")$region == "China", ]
+## The map (maps + ggplot2 )
+kenya_map <- ggplot() +
+    ## First layer: worldwide map
+    geom_polygon(
+        data = map_data("world"),
+        aes(x = long, y = lat, group = group),
+        color = "#9c9c9c", fill = "#f3f3f3"
+    ) +
+    ## Second layer: Country map
+    geom_polygon(
+        data = map_data_es,
+        aes(x = long, y = lat, group = group),
+        color = "red", fill = "pink"
+    ) +
+    coord_map() +
+    coord_fixed(1,
+        xlim = c(28.6, 56.14834),
+        ylim = c(-10, 10.5)
+    ) +
+    ggtitle("A map of Spain") +
+    theme(panel.background = element_rect(fill = "blue"))
+
+
+kenya_map
+
+# Global map_data
+worldmap <- map_data("world")
+
+# Kenya map_data
+
+ke_map <- map_data("world") %>%
+    filter(region == "Kenya") %>%
+    arrange(long) %>%
+    summarise(
+        min_long = min(long) - 4.264355,
+        max_long = max(long) + 4.264355,
+        min_lat = min(lat) - 2.025928,
+        max_lat = max(lat) + 2.025928
+    )
+
+ke_map
+
+dummy_sp_ll <- data_frame(map_data("world") %>%
+    filter(region == "Spain") %>%
+    arrange(long) %>%
+    summarise(min_long = min(long), max_long = max(long), min_lat = min(lat), max_lat = max(lat)))
+sp_map
+
+13.5 - 9.235645
+
+real_sp_ll <- tibble(names = c("min_long_real", "max_long_real", "min_lat_real", "max_lat_real"), value = c(-13.5, 8.5, 34, 45)) %>%
+    pivot_wider(names_from = names)
+
+spain_var <- cbind(sp_map, dummy_sp_ll) %>%
+    mutate(exp_long = min_long - min_long_dummy)
+
+cbind(dummy_sp_ll, real_sp_ll) %>%
+    mutate(
+        add_long = min_long - min_long_real,
+        add_lat = min_lat - min_lat_real
+    ) %>%
+    select(add_long, add_lat)
