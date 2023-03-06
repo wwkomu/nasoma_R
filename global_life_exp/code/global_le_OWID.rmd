@@ -27,7 +27,7 @@ library(gganimate)
 library(ggplot2)
 library(lubridate)
 
-#options
+# options
 options(browser = "firefox")
 ```
 
@@ -58,11 +58,46 @@ kenya_le <- owid_le %>%
 kenya_le
 
 ln_p_ke_anim <- kenya_le %>%
+  ggplot(aes(year, life_expectancy, groupn = 1, color = country)) +
+  geom_point(aes(size = life_expectancy), show.legend = FALSE) +
+  geom_line(aes(color = country)) +
+  scale_x_continuous(limits = c(1920, 2030), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(20, 70), expand = c(0, 0)) +
+  labs(
+    title = "Change in Kenya's life expectancy since 1927 to 2021",
+    x = "Year",
+    y = "Life Expectancy (years)"
+  ) +
+  theme(
+    plot.title = element_text(margin = margin(b = 10)),
+    axis.text.x.bottom = element_text(margin = margin(b = 10)),
+    axis.text.y.left = element_text(margin = margin(l = 10)),
+    legend.title = element_blank()
+  ) +
+  theme_economist() +
+  transition_reveal(along = year)
+
+anim_save("figures/kenya_lifeExp_line_plt_anim_owid.gif")
+animate(ln_p_ke_anim)
+animate(ln_p_ke_anim, width = 5.5, height = 4.5, unit = "in", res = 300)
+
+ggsave("figures/kenya_le_owid.png")
+
+
+# Test theme_classic()
+
+ln_p1_ke_anim <- kenya_le %>%
   ggplot(aes(year, life_expectancy, color = country)) +
   geom_point(aes(size = life_expectancy), show.legend = FALSE) +
   geom_line(aes(color = country)) +
   scale_x_continuous(limits = c(1920, 2030), expand = c(0, 0)) +
-  theme_economist() +
+  scale_y_continuous(limits = c(20, 70), expand = c(0, 0)) +
+  labs(
+    title = "Change in Kenya's life expectancy since 1927 to 2021",
+    x = "Year",
+    y = "Life Expectancy (years)"
+  ) +
+  theme_classic() +
   theme(
     axis.text.x.bottom = element_text(margin = margin(b = 10)),
     axis.text.y.left = element_text(margin = margin(l = 10)),
@@ -70,15 +105,188 @@ ln_p_ke_anim <- kenya_le %>%
   ) +
   transition_reveal(along = year)
 
-animate(ln_p_ke_anim)
+animate(ln_p1_ke_anim)
+
+animate(ln_p1_ke_anim, width = 5.5, height = 4.5, unit = "in", res = 300)
+
+anim_save("figures/kenya_lifeExp_line_lnp2_anim_owid.gif")
 
 # theme_void() +nt_te
 # theme(plot.background = element_rect(fill ="white"))
 
-ggsave("figures/kenya_le_owid.png")
+ggsave("figures/kenya_le_lnp1_owid.png")
+
+
+# Test theme_classic() and geom_point(only)
+
+ln_p2_ke_anim <- kenya_le %>%
+  ggplot(aes(year, life_expectancy, color = country)) +
+  geom_point(aes(size = life_expectancy), show.legend = FALSE) +
+  # geom_line(aes(color = country)) +
+  scale_x_continuous(limits = c(1920, 2030), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(20, 70), expand = c(0, 0)) +
+  labs(
+    title = "Change in Kenya's life expectancy since 1927 to 2021",
+    x = "Year",
+    y = "Life Expectancy (years)"
+  ) +
+  theme_classic() +
+  theme(
+    axis.text.x.bottom = element_text(margin = margin(b = 10)),
+    axis.text.y.left = element_text(margin = margin(l = 10)),
+    legend.title = element_blank()
+  ) +
+  transition_reveal(along = year)
+
+animate(ln_p2_ke_anim)
+
+animate(ln_p2_ke_anim, width = 5.5, height = 4.5, unit = "in", res = 300)
+
+anim_save("figures/kenya_lifeExp_line_lnp1_anim_owid.gif")
+
+# theme_void() +nt_te
+# theme(plot.background = element_rect(fill ="white"))
+
+ggsave("figures/kenya_le_lnp2_owid.png")
 ```
 
-##
+## Comparison: Kenya vs China
+
+```{r kenya_china_le}
+
+kenya_china_plt <- owid_le %>%
+  filter(country %in% c("Kenya", "China")) %>%
+  select(year, country, life_expectancy) %>%
+  ggplot(aes(year, life_expectancy, color = country, group = country)) +
+  geom_point(aes(size = life_expectancy), show.legend = FALSE) +
+  geom_line() +
+  scale_x_continuous(limits = c(1920, 2030), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(20, 80), expand = c(0, 0)) +
+  labs(
+    title = "Life expectancy since 1927 to 2021",
+    subtitle = "A comparision of Kenya and China",
+    x = "Year",
+    y = "Life Expectancy (years)"
+  ) +
+  theme_tufte()
+
+ggsave("figures/raw/kenya-china_le_line_plt00.png")
+
+```
+
+###  theme_classic
+
+```{r theme_classic()}
+
+kenya_china_plt +
+theme_classic() +
+  theme(
+    plot.title.position = "plot", ,
+    plot.title = element_text(margin = margin(b = 10)),
+    axis.text.x.bottom = element_text(margin = margin(b = 10)),
+    axis.text.y.left = element_text(margin = margin(l = 10)),
+    legend.title = element_blank()
+  )
+
+ggsave("figures/raw/kenya-china_le_line_plt01.png")
+
+```
+
+### THEME_CLEAN
+
+```{r theme_clean()}
+
+kenya_china_plt +
+  theme_clean() +
+  theme(
+    plot.title.position = "plot", ,
+    plot.title = element_text(margin = margin(b = 10)),
+    axis.text.x.bottom = element_text(margin = margin(b = 10)),
+    axis.text.y.left = element_text(margin = margin(l = 10)),
+    legend.title = element_blank()
+  ) +
+  transition_reveal(along = year)
+
+
+
+anim_save("figures/raw/kenya-china_le_line_plt02_anim_owid.gif")
+
+animate(
+kenya_china_plt, width = 4.5, height = 4.5, unit = "in", res = 300)
+
+ggsave("figures/raw/kenya-china_le_line_plt02.png")
+
+```
+
+```{r theme_light()}
+
+kenya_china_plt +
+  theme_light() +
+  theme(
+    plot.title.position = "plot", ,
+    plot.title = element_text(margin = margin(b = 10)),
+    axis.text.x.bottom = element_text(margin = margin(b = 10)),
+    axis.text.y.left = element_text(margin = margin(l = 10)),
+    legend.title = element_blank()
+  ) +
+  transition_reveal(along = year)
+
+anim_save("figures/raw/kenya-china_le_line_plt03_anim_owid.gif")
+
+animate(
+  kenya_china_plt,
+  width = 4.5, height = 4.5, unit = "in", res = 300
+)
+
+ggsave("figures/raw/kenya-china_le_line_plt03.png")
+
+```
+
+```{r theme_classic()}
+
+kenya_china_plt +
+  theme_light() +
+  theme(
+    plot.title.position = "plot", ,
+    plot.title = element_text(margin = margin(b = 10)),
+    axis.text.x.bottom = element_text(margin = margin(b = 10)),
+    axis.text.y.left = element_text(margin = margin(l = 10)),
+    legend.title = element_blank()
+  ) +
+  transition_reveal(along = year)
+
+anim_save("figures/raw/kenya-china_le_line_plt03_anim_owid.gif")
+
+animate(
+  kenya_china_plt,
+  width = 4.5, height = 4.5, unit = "in", res = 300
+)
+
+ggsave("figures/raw/kenya-china_le_line_plt03.png")
+```
+
+```{r theme_classic()}
+
+kenya_china_plt +
+  theme_light() +
+  theme(
+    plot.title.position = "plot", ,
+    plot.title = element_text(margin = margin(b = 10)),
+    axis.text.x.bottom = element_text(margin = margin(b = 10)),
+    axis.text.y.left = element_text(margin = margin(l = 10)),
+    legend.title = element_blank()
+  ) +
+  transition_reveal(along = year)
+
+anim_save("figures/raw/kenya-china_le_line_plt05_anim_owid.gif")
+
+animate(
+kenya_china_plt, width = 4.5, height = 4.5, unit = "in", res = 300)
+
+ggsave("figures/raw/kenya-china_le_line_plt05.png")
+```
+
+## Preview extreme values
 
 The code chuck below helps us to preview the extreme ends of the data for the various countries of interest and the global_le as a whole!
 

@@ -1,0 +1,147 @@
+Packages in library ‘/home/iamlnx/miniconda3/lib/R/library’:
+
+askpass                 Safe Password Entry for R, Git, and SSH
+assertthat              Easy Pre and Post Assertions
+backports               Reimplementations of Functions Introduced Since
+                        R-3.0.0
+base                    The R Base Package
+base64enc               Tools for base64 encoding
+bit                     Classes and Methods for Fast Memory-Efficient
+                        Boolean Selections
+bit64                   A S3 Class for Vectors of 64bit Integers
+blob                    A Simple S3 Class for Representing Vectors of
+                        Binary Data ('BLOBS')
+brew                    Templating Framework for Report Generation
+broom                   Convert Statistical Objects into Tidy Tibbles
+bslib                   Custom 'Bootstrap' 'Sass' Themes for 'shiny'
+                        and 'rmarkdown'
+cachem                  Cache R Objects with Automatic Pruning
+callr                   Call R from R
+cellranger              Translate Spreadsheet Cell Ranges to Rows and
+                        Columns
+cli                     Helpers for Developing Command Line Interfaces
+clipr                   Read and Write from the System Clipboard
+codetools               Code Analysis Tools for R
+collections             High Performance Container Data Types
+colorspace              A Toolbox for Manipulating and Assessing Colors
+                        and Palettes
+commonmark              High Performance CommonMark and Github Markdown
+                        Rendering in R
+compiler                The R Compiler Package
+cpp11                   A C++11 Interface for R's C Interface
+crayon                  Colored Terminal Output
+curl                    A Modern and Flexible Web Client for R
+cyclocomp               Cyclomatic Complexity of R Code
+data.table              Extension of `data.frame`
+datasets                The R Datasets Package
+DBI                     R Database Interface
+dbplyr                  A 'dplyr' Back End for Databases
+desc                    Manipulate DESCRIPTION Files
+digest                  Create Compact Hash Digests of R Objects
+dplyr                   A Grammar of Data Manipulation
+dtplyr                  Data Table Back-End for 'dplyr'
+ellipsis                Tools for Working with ...
+emo                     Easily Insert 'Emoji'
+evaluate                Parsing and Evaluation Tools that Provide More
+                        Details than the Default
+fansi                   ANSI Control Sequence Aware String Functions
+farver                  High Performance Colour Space Manipulation
+fastmap                 Fast Data Structures
+forcats                 Tools for Working with Categorical Variables
+                        (Factors)
+fs                      Cross-Platform File System Operations Based on
+                        'libuv'
+gapminder               Data from Gapminder
+gargle                  Utilities for Working with Google APIs
+generics                Common S3 Generics not Provided by Base R
+                        Methods Related to Model Fitting
+gganimate               A Grammar of Animated Graphics
+ggplot2                 Create Elegant Data Visualisations Using the
+                        Grammar of Graphics
+ggthemes                Extra Themes, Scales and Geoms for 'ggplot2'
+gifski                  Highest Quality GIF Encoder
+glue                    Interpreted String Literals
+googledrive             An Interface to Google Drive
+googlesheets4           Access Google Sheets using the Sheets API V4
+graphics                The R Graphics Package
+grDevices               The R Graphics Devices and Support for Colours
+                        and Fonts
+grid                    The Grid Graphics Package
+gridExtra               Miscellaneous Functions for "Grid" Graphics
+gtable                  Arrange 'Grobs' in Tables
+haven                   Import and Export 'SPSS', 'Stata' and 'SAS'
+                        Files
+highr                   Syntax Highlighting for R Source Code
+hms                     Pretty Time of Day
+htmltools               Tools for HTML
+httr                    Tools for Working with URLs and HTTP
+ids                     Generate Random Identifiers
+isoband                 Generate Isolines and Isobands from Regularly
+                        Spaced Elevation Grids
+janitor                 Simple Tools for Examining and Cleaning Dirty
+                        Data
+jquerylib               Obtain 'jQuery' as an HTML Dependency Object
+jsonlite                A Simple and Robust JSON Parser and Generator
+                        for R
+knitr                   A General-Purpose Package for Dynamic Report
+                        Generation in R
+labeling                Axis Labeling
+languageserver          Language Server Protocol
+lattice                 Trellis Graphics for R
+lazyeval                Lazy (Non-Standard) Evaluation
+lifecycle               Manage the Life Cycle of your Package Functions
+lintr                   A 'Linter' for R Code
+lubridate               Make Dealing with Dates a Little Easier
+magrittr                A Forward-Pipe Operator for R
+MASS                    Support Functions and Datasets for Venables and
+                        Ripley's MASS
+Matrix                  Sparse and Dense Matrix Classes and Methods
+memoise                 'Memoisation' of Functions
+methods                 Formal Methods and Classes
+mgcv                    Mixed GAM Computation Vehicle with Automatic
+                        Smoothness Estimation
+mime                    Map Filenames to MIME Types
+modelr                  Modelling Functions that Work with the Pipe
+munsell                 Utilities for Using Munsell Colours
+nlme                    Linear and Nonlinear Mixed Effects Models
+openssl                 Toolkit for Encryption, Signatures and
+                        Certificates Based on OpenSSL
+parallel                Support for Parallel computation in R
+pillar                  Coloured Formatting for Columns
+pkgconfig               Private Configuration for 'R' Packages
+pkgload                 Simulate Package Installation and Attach
+prettyunits             Pretty, Human Readable Formatting of Quantities
+processx                Execute and Control System Processes
+progress                Terminal Progress Bars
+ps                      List, Query, Manipulate System Processes
+purrr                   Functional Programming Tools
+R.cache                 Fast and Light-Weight Caching (Memoization) of
+                        Objects and Results to Speed Up Computations
+R.methodsS3             S3 Methods Simplified
+R.oo                    R Object-Oriented Programming with or without
+                        References
+R.utils                 Various Programming Utilities
+R6                      Encapsulated Classes with Reference Semantics
+rappdirs                Application Directories: Determine Where to
+                        Save Data, Caches, and Logs
+RColorBrewer            ColorBrewer Palettes
+Rcpp                    Seamless R and C++ Integration
+readr                   Read Rectangular Text Data
+readxl                  Read Excel Files
+rematch                 Match Regular Expressions with a Nicer 'API'
+rematch2                Tidy Output from Regular Expression Matching
+remotes                 R Package Installation from Remote
+                        Repositories, Including 'GitHub'
+reprex                  Prepare Reproducible Example Code via the
+                        Clipboard
+rex                     Friendly Regular Expressions
+rlang                   Functions for Base Types and Core R and
+                        'Tidyverse' Features
+rmarkdown               Dynamic Documents for R
+roxygen2                In-Line Documentation for R
+rprojroot               Finding Files in Project Subdirectories
+rstudioapi              Safely Access the RStudio API
+rvest                   Easily Harvest (Scrape) Web Pages
+sass                    Syntactically Awesome Style Sheets ('Sass')
+scales                  Scale Functions for Visualization
+selectr                 Translate CSS Selectors to XPath Ex
